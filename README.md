@@ -2,7 +2,7 @@
 [![License](https://img.shields.io/github/license/AvdLee/SwiftUI-Agent-Skill)](LICENSE)
 [![Weekly Installs](https://img.shields.io/badge/weekly%20installs-6.6k-brightgreen)](https://skills.sh/avdlee/swiftui-agent-skill/swiftui-expert-skill)
 [![GitHub Release](https://img.shields.io/github/v/release/AvdLee/SwiftUI-Agent-Skill)](https://github.com/AvdLee/SwiftUI-Agent-Skill/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/AvdLee/SwiftUI-Agent-Skill)](https://github.com/AvdLee/SwiftUI-Agent-Skill)
+[![GitHub Stars](https://img.shields.io/github/stars/AvdLee/SwiftUI-Agent-Skill?style=flat)](https://github.com/AvdLee/SwiftUI-Agent-Skill/stargazers)
 
 Expert guidance for any AI coding tool that supports the [Agent Skills open format](https://agentskills.io/home) — SwiftUI state management, view composition, performance, and iOS 26+ Liquid Glass adoption.
 
