@@ -190,7 +190,9 @@ The key distinction is **ownership**: `@StateObject` when the view **creates and
 Prefer storing the `@StateObject` in the parent view and passing it down. If you must create one in a custom initializer, pass the expression directly to `StateObject(wrappedValue:)` so the `@autoclosure` prevents redundant allocations:
 
 ```swift
+// Inside a View's init(movie:):
 // WRONG — assigning to a local first defeats @autoclosure
+let vm = MovieDetailsViewModel(movie: movie)
 _viewModel = StateObject(wrappedValue: vm)
 
 // CORRECT — inline expression defers creation

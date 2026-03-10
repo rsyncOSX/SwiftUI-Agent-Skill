@@ -101,7 +101,30 @@ OptimizedImageView(
 )
 ```
 
-For reusable downsampling, extract the `decodeAndDownsample` function into an `actor` to add `UIScreen.main.scale` multiplier and `kCGImageSourceShouldCache: false` for tighter memory control.
+### Reusable Downsampling Actor
+
+For production use, wrap the logic in an `actor` with scale-aware sizing and cache-disabled source options:
+
+```swift
+actor ImageProcessor {
+    func downsample(data: Data, targetSize: CGSize) -> UIImage? {
+        let scale = await UIScreen.main.scale
+        let maxPixel = max(targetSize.width, targetSize.height) * scale
+        let sourceOptions: [CFString: Any] = [kCGImageSourceShouldCache: false]
+        guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary) else { return nil }
+        let downsampleOptions: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixel,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true
+        ]
+        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampleOptions as CFDictionary) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+}
+```
+
+Key details: `kCGImageSourceShouldCache: false` on the source prevents the full-resolution image from being cached in memory. Multiplying `targetSize` by `UIScreen.main.scale` ensures the thumbnail is sharp on Retina displays. `kCGImageSourceShouldCacheImmediately: true` on the thumbnail forces decoding at creation time rather than at first render.
 
 ### When to Suggest This Optimization
 

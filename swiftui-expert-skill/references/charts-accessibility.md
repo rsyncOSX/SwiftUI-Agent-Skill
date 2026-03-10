@@ -5,6 +5,7 @@
 - [Accessibility](#accessibility)
   - [Meaningful Labels](#meaningful-labels)
   - [Custom Audio Graphs](#custom-audio-graphs)
+- [Composite Example](#composite-example)
 - [Fallback Strategies](#fallback-strategies)
   - [Version Breakdown](#version-breakdown)
 - [WWDC Sessions](#wwdc-sessions)
@@ -74,9 +75,31 @@ struct StepsChart: View, AXChartDescriptorRepresentable {
 }
 ```
 
+## Composite Example
+
+A scrollable bar chart with range selection combining multiple iOS 17+ APIs:
+
+```swift
+@State private var selectedRange: ClosedRange<Int>?
+
+Chart(weeklyRevenue) { week in
+    BarMark(x: .value("Week", week.index), y: .value("Revenue", week.revenue))
+        .foregroundStyle(by: .value("Region", week.region))
+}
+.chartScrollableAxes(.horizontal)
+.chartXVisibleDomain(length: 8)
+.chartXSelection(range: $selectedRange)
+.chartXAxis {
+    AxisMarks(values: .stride(by: 1)) {
+        AxisGridLine()
+        AxisValueLabel { Text("W\($0.as(Int.self) ?? 0)") }
+    }
+}
+```
+
 ## Fallback Strategies
 
-Gate advanced APIs with `#available` and provide a fallback chart without the gated features (e.g., omit `.chartXSelection` on iOS 16).
+Gate advanced APIs with `#available` and provide a fallback chart without the gated features. Because chart modifiers like `.chartXSelection` change the return type, you must duplicate the entire `Chart` — you cannot conditionally apply the modifier:
 
 ### Version Breakdown
 

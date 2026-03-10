@@ -444,7 +444,7 @@ Use `chartOverlay`/`chartBackground` (iOS 16+) or `chartGesture` (iOS 17+) with 
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        guard let plotFrame = proxy.plotFrame else { return }
+                        guard let plotFrame = proxy.plotFrame else { return } // iOS 16: use proxy.plotAreaFrame
                         let frame = geometry[plotFrame]
                         let x = value.location.x - frame.origin.x
                         guard x >= 0, x <= frame.size.width else { return }

@@ -35,7 +35,16 @@ These replacements have minimal API shape changes. Most are near-direct swaps; a
 - **Always use `.confirmationDialog(_:isPresented:actions:message:)`** instead of `actionSheet(...)`.
 - **Always use `.alert(_:isPresented:actions:message:)`** instead of `alert(isPresented:content:)`.
 
-Both take a title `String`, `isPresented: Binding<Bool>`, an `actions` builder with `Button` items (supporting `role: .destructive` / `.cancel`), and an optional `message` builder.
+Both take a title `String`, `isPresented: Binding<Bool>`, an `actions` builder with `Button` items (supporting `role: .destructive` / `.cancel`), and an optional `message` builder:
+
+```swift
+.alert("Delete Item?", isPresented: $showAlert) {
+    Button("Delete", role: .destructive) { deleteItem() }
+    Button("Cancel", role: .cancel) { }
+} message: {
+    Text("This action cannot be undone.")
+}
+```
 
 ### Text Input
 
@@ -143,7 +152,10 @@ Image("hero")
 ```
 
 - **`visualEffect { content, geometry in ... }`** — position-based effects (parallax, offsets) without a `GeometryReader` wrapper.
-- **`onGeometryChange(for:of:action:)`** — react to geometry changes of a specific view; useful for driving state/effects. `GeometryReader` is still better when layout itself depends on geometry.
+- **`onGeometryChange(for:of:action:)`** — react to geometry changes of a specific view; useful for driving state/effects. `GeometryReader` is still better when layout itself depends on geometry. Note the two-closure shape:
+  ```swift
+  .onGeometryChange(for: CGFloat.self) { proxy in proxy.size.height } action: { newHeight in height = newHeight }
+  ```
 - **`.coordinateSpace(.named("id"))`** instead of `.coordinateSpace(name: "id")`.
 
 ---

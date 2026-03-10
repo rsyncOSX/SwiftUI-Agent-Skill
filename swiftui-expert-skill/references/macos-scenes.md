@@ -106,7 +106,7 @@ MenuBarExtra("Status", systemImage: "chart.bar") {
 ```
 
 **Variations:**
-- **Toggleable** — pass `isInserted: $showMenuBarExtra` (bound to `@AppStorage`) to let users show/hide the extra
+- **Toggleable** — pass `isInserted:` with an `@AppStorage` binding to let users show/hide the extra: `MenuBarExtra("Status", systemImage: "chart.bar", isInserted: $showMenuBarExtra)`
 - **Menu-bar-only app** — use `MenuBarExtra` as the sole scene + set `LSUIElement = true` in Info.plist to hide the Dock icon. The app auto-terminates if the user removes the extra from the menu bar.
 
 ---
@@ -267,8 +267,12 @@ struct TextFile: FileDocument {
     static var readableContentTypes: [UTType] { [.plainText] }
     var text: String = ""
     init() {}
-    init(configuration: ReadConfiguration) throws { /* read from configuration.file */ }
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { /* write data */ }
+    init(configuration: ReadConfiguration) throws {
+        text = String(data: configuration.file.regularFileContents ?? Data(), encoding: .utf8) ?? ""
+    }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: Data(text.utf8))
+    }
 }
 ```
 
