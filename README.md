@@ -120,8 +120,8 @@ swiftui-expert-skill/
     animation-advanced.md - Performance, interpolation, and complex animation chains
     animation-basics.md - Core animation concepts, implicit/explicit animations, timing
     animation-transitions.md - View transitions, matchedGeometryEffect, and state changes
-    charts.md - Swift Charts marks, axes, selection, styling, composition, and Chart3D
     charts-accessibility.md - Charts accessibility, fallback strategies, and WWDC sessions
+    charts.md - Swift Charts marks, axes, selection, styling, composition, and Chart3D
     image-optimization.md - AsyncImage usage, downsampling, caching
     latest-apis.md
     layout-best-practices.md - Layout patterns and GeometryReader alternatives
