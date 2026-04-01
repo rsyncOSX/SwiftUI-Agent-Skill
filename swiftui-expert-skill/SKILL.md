@@ -9,7 +9,6 @@ description: Write, review, or improve SwiftUI code following best practices for
 
 - Consult `references/latest-apis.md` at the start of every task to avoid deprecated APIs
 - Prefer native SwiftUI APIs over UIKit/AppKit bridging unless bridging is necessary
-- Prefer `sensoryFeedback()` over UIKit feedback generators when working in SwiftUI views
 - Focus on correctness and performance; do not enforce specific architectures (MVVM, VIPER, etc.)
 - Encourage separating business logic from views for testability without mandating how
 - Follow Apple's Human Interface Guidelines and API design patterns
@@ -77,7 +76,6 @@ These are hard rules -- violations are always bugs:
 - [ ] `ForEach` uses stable identity (never `.indices` for dynamic content)
 - [ ] Constant number of views per `ForEach` element
 - [ ] `.animation(_:value:)` always includes the `value` parameter
-- [ ] SwiftUI haptics use `sensoryFeedback()` instead of UIKit feedback generators
 - [ ] iOS 26+ APIs gated with `#available` and fallback provided
 - [ ] `import Charts` present in files using chart types
 
