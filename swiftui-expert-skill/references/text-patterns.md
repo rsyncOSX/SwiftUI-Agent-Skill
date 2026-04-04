@@ -6,12 +6,27 @@
 
 ## Text Initialization: Verbatim vs Localized
 
-Use the correct initializer based on whether the string should be localized.
+**Default: always use `Text("…")`.** Only use `Text(verbatim:)` when explicitly required for a string literal that must not be localized.
 
 ```swift
-// Localized - "Save" becomes the localization key, auto-exported to Localizable.strings
+// Localized literal - "Save" is used as the localization key and looked up in Localizable.strings
 Text("Save")
 
-// Non-localized - always displays "pencil", regardless of locale
+// String variable - bypasses localization automatically; no verbatim needed
+let filename: String = model.exportFilename
+Text(filename)
+
+// Non-localized literal - use verbatim only when the literal must not be localized
 Text(verbatim: "pencil")
+```
+
+### Decision Flow
+
+```
+Is the input a String variable or dynamic value?
+└─ YES → Text(variable)          // bypasses localization automatically
+
+Is the string literal intended for localization?
+├─ YES → Text("…")               // default; key looked up in Localizable.strings
+└─ NO  → Text(verbatim: "…")     // only when explicitly non-localized
 ```
