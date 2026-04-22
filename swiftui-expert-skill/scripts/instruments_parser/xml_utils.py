@@ -41,22 +41,13 @@ class RowStream:
         return target
 
     def __iter__(self) -> Iterator[dict[str, ET.Element]]:
-        # iterparse yields only `end` events by default, which fire after a
-        # complete element is parsed. We capture ids on end so descendants
-        # have been seen.
+        # iterparse fires `end` events once an element is fully parsed, so ids
+        # are visible to descendants via the cache. We only need `end` events;
+        # row bodies are reconstructed from the end element itself in _row_dict.
         schema_seen = False
-        current_row: list[ET.Element] = []
-        in_row = False
 
-        context = ET.iterparse(_bytes_to_file(self._xml), events=("start", "end"))
-        for event, elem in context:
-            if event == "start":
-                if elem.tag == "row":
-                    in_row = True
-                    current_row = []
-                continue
-
-            # end event
+        context = ET.iterparse(_bytes_to_file(self._xml), events=("end",))
+        for _event, elem in context:
             eid = elem.get("id")
             if eid is not None:
                 self._id_cache[eid] = elem
@@ -64,19 +55,11 @@ class RowStream:
             if elem.tag == "schema" and not schema_seen:
                 self.columns = _parse_columns(elem)
                 schema_seen = True
-                # Schemas can be large text blobs in theory; release their text
-                # but KEEP them attached (children may be in id_cache).
                 continue
 
             if elem.tag == "row":
-                in_row = False
                 yield _row_dict(elem, self.columns)
                 # Do not clear elem — children referenced via id may still be needed.
-                continue
-
-            # Collect top-level row children as they end (positional)
-            # handled inside _row_dict.
-            _ = in_row, current_row  # placeholders; unused
 
 
 def _parse_columns(schema_el: ET.Element) -> list[Column]:

@@ -75,8 +75,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     mode_group.add_argument(
         "--log-limit", type=int, default=None,
-        help="Cap number of log entries returned.",
+        help="Cap number of log entries returned (applied after all filters).",
     )
+    mode_group.add_argument(
+        "--signpost-name-contains", type=str, default=None,
+        help="Case-insensitive substring match on signpost name.",
+    )
+    mode_group.add_argument("--signpost-subsystem", type=str, default=None)
+    mode_group.add_argument("--signpost-category", type=str, default=None)
 
     fmt_group = parser.add_mutually_exclusive_group()
     fmt_group.add_argument("--json-only", action="store_true")
@@ -100,25 +106,20 @@ def main(argv: list[str] | None = None) -> int:
             message_contains=args.log_message_contains,
             message_type=args.log_type,
             limit=args.log_limit,
+            window_ns=window_ns,
         )
-        if window_ns is not None:
-            s, e = window_ns
-            out = [l for l in out if s <= l["time_ns"] <= e]
         sys.stdout.write(json.dumps({"logs": out, "count": len(out)}, indent=2))
         sys.stdout.write("\n")
         return 0
 
     if args.list_signposts:
-        sp = events.list_signposts(trace, info.schemas)
-        if window_ns is not None:
-            s, e = window_ns
-            sp["intervals"] = [
-                i for i in sp["intervals"]
-                if not (i["end_ns"] < s or i["start_ns"] > e)
-            ]
-            sp["events"] = [
-                ev for ev in sp["events"] if s <= ev["time_ns"] <= e
-            ]
+        sp = events.list_signposts(
+            trace, info.schemas,
+            name_contains=args.signpost_name_contains,
+            subsystem=args.signpost_subsystem,
+            category=args.signpost_category,
+            window_ns=window_ns,
+        )
         sys.stdout.write(json.dumps(sp, indent=2))
         sys.stdout.write("\n")
         return 0

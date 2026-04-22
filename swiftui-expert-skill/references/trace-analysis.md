@@ -66,13 +66,18 @@ AND-combined; `--log-message-contains` is case-insensitive substring match.
 
 ```bash
 python3 "${SKILL_DIR}/scripts/analyze_trace.py" --trace <path> --list-signposts \
+  [--signpost-name-contains "ImageDecode"] \
+  [--signpost-subsystem com.myapp.feed] \
+  [--signpost-category "Rendering"] \
   [--window START_MS:END_MS]
 ```
 
 Returns JSON `{ "intervals": [...], "events": [...] }`. Intervals are
 paired `begin`/`end` signposts with `start_ms`, `end_ms`, `duration_ms`,
 `name`, `subsystem`, `category`, `process`, `signpost_id`. Single-point
-events (and any unpaired begins) go into `events`.
+events (and any unpaired begins) go into `events`. All filters are
+AND-combined; `--signpost-name-contains` is case-insensitive substring
+match.
 
 ## Composition pattern — scoping to a slice
 
@@ -95,8 +100,8 @@ Examples:
   → Two `--list-logs` calls (or one with a broader filter), pick the two
   timestamps, set window = `[first, second]`.
 - *"During the signpost 'ImageDecode'."*
-  → `--list-signposts`, find the interval(s) by `name`, set window =
-  `[start_ms, end_ms]`.
+  → `--list-signposts --signpost-name-contains "ImageDecode"`, pick the
+  interval, set window = `[start_ms, end_ms]`.
 
 ## JSON shape
 

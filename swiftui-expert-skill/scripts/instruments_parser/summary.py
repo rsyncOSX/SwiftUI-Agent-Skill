@@ -197,10 +197,12 @@ def _short_thread(name: str) -> str:
     if name.startswith("Main Thread") or name == "main":
         return "main"
     # "NowPlaying Gigs (0x251990d) (NowPlaying Gigs, pid: 28401)" -> "tid 0x251990d"
-    if "(0x" in name:
-        start = name.index("(0x") + 1
-        end = name.index(")", start)
-        return f"tid {name[start:end]}"
+    tid_start = name.find("(0x")
+    if tid_start != -1:
+        start = tid_start + 1
+        end = name.find(")", start)
+        if end != -1:
+            return f"tid {name[start:end]}"
     return name[:40]
 
 

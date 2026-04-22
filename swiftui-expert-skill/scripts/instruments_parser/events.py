@@ -22,8 +22,14 @@ def list_logs(
     message_contains: str | None = None,
     message_type: str | None = None,
     limit: int | None = None,
+    window_ns: tuple[int, int] | None = None,
 ) -> list[dict[str, Any]]:
-    """Return os_log entries, optionally filtered. Case-insensitive contains."""
+    """Return os_log entries, optionally filtered. Case-insensitive contains.
+
+    `limit` counts *post-filter* matches — including the window filter — so
+    the caller gets N matching logs inside the window rather than the first
+    N matching logs that might all fall outside it.
+    """
     if OS_LOG_SCHEMA not in toc_schemas:
         return []
     xml_bytes = xctrace.export_schema(trace_path, OS_LOG_SCHEMA)
@@ -37,6 +43,8 @@ def list_logs(
             continue
         time_ns = xml_utils.int_text(stream.resolve(time_el))
         if time_ns is None:
+            continue
+        if not xml_utils.in_window(time_ns, window_ns):
             continue
 
         sub = _str_of(row, stream, "subsystem")
@@ -80,11 +88,19 @@ def list_logs(
 def list_signposts(
     trace_path: Path,
     toc_schemas: frozenset[str],
+    name_contains: str | None = None,
+    subsystem: str | None = None,
+    category: str | None = None,
+    window_ns: tuple[int, int] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Return signpost intervals (paired begin/end) plus single-point events.
 
     Shape: { "intervals": [...], "events": [...] }. Intervals have
     start_ms/end_ms/duration_ms; events have a single time_ms.
+
+    Filters are AND-combined. `name_contains` is a case-insensitive substring
+    match. `window_ns` keeps intervals that overlap the window (not strict
+    containment) and point events whose timestamp falls inside it.
     """
     if OS_SIGNPOST_SCHEMA not in toc_schemas:
         return {"intervals": [], "events": []}
@@ -150,6 +166,30 @@ def list_signposts(
 
     intervals.sort(key=lambda i: i["start_ns"])
     events.sort(key=lambda e: e["time_ns"])
+
+    needle = name_contains.lower() if name_contains else None
+
+    def _matches(entry: dict) -> bool:
+        if subsystem and (entry.get("subsystem") or "") != subsystem:
+            return False
+        if category and (entry.get("category") or "") != category:
+            return False
+        if needle and needle not in (entry.get("name") or "").lower():
+            return False
+        return True
+
+    if subsystem or category or needle:
+        intervals = [i for i in intervals if _matches(i)]
+        events = [e for e in events if _matches(e)]
+
+    if window_ns is not None:
+        s, e = window_ns
+        intervals = [
+            i for i in intervals
+            if not (i["end_ns"] < s or i["start_ns"] > e)
+        ]
+        events = [ev for ev in events if s <= ev["time_ns"] <= e]
+
     return {"intervals": intervals, "events": events}
 
 

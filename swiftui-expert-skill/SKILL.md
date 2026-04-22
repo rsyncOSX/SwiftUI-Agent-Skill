@@ -69,10 +69,11 @@ Full reference: `references/trace-analysis.md`. Summary of the composition patte
    # Find a log that marks the start/end of the region of interest:
    python3 "${SKILL_DIR}/scripts/analyze_trace.py" --trace <path> \
        --list-logs --log-message-contains "loaded feed" --log-limit 5
-   # Or list os_signpost intervals (paired begin/end) by name:
-   python3 "${SKILL_DIR}/scripts/analyze_trace.py" --trace <path> --list-signposts
+   # Or list os_signpost intervals (paired begin/end), filterable by name:
+   python3 "${SKILL_DIR}/scripts/analyze_trace.py" --trace <path> \
+       --list-signposts --signpost-name-contains "ImageDecode"
    ```
-   Pick the `time_ms` (for logs) or `start_ms`/`end_ms` (for signposts) that match the user's description. Build a window like `--window 10400:11700`.
+   Both modes accept `--window START_MS:END_MS` to scope discovery. Pick the `time_ms` (for logs) or `start_ms`/`end_ms` (for signposts) that match the user's description. Build a window like `--window 10400:11700`.
 3. **Run the main analysis** (with or without `--window`):
    ```bash
    python3 "${SKILL_DIR}/scripts/analyze_trace.py" --trace <path> \
