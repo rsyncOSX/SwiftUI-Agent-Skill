@@ -124,8 +124,40 @@ This skill covers the full surface of SwiftUI development -- from state manageme
 - **Accessibility** -- VoiceOver, Dynamic Type, grouping, traits
 - **Image optimization** -- AsyncImage, downsampling, caching
 - **Latest APIs** -- deprecated-to-modern migration guide (iOS 15+ through iOS 26+)
+- **Instruments trace recording & analysis** -- bundled `xctrace` toolchain for diagnosing hangs, hitches, and expensive SwiftUI view updates (see below)
 
 Non-opinionated: focuses on correctness and performance, not architecture or code style.
+
+## Recording & Analysing Instruments Traces
+
+Unlike the other reference files — which are text guidance — this part of the skill ships an executable Python toolchain that wraps `xctrace`. It lets the agent **record** a new `.trace` and **analyse** an existing one end-to-end: the parser reads the Time Profiler, Hangs, Animation Hitches, SwiftUI updates, and SwiftUI cause-graph lanes, correlates hangs/hitches with main-thread samples, and emits JSON + markdown so the agent can reason over structured data instead of the raw `xctrace export` firehose.
+
+**When it triggers:**
+
+- A `.trace` path appears in the prompt (analysis).
+- The user asks to record, profile, or capture a session (recording).
+
+**What the agent can then ask:**
+
+```text
+Analyse ~/Desktop/MyApp.trace and tell me what's wrong.
+
+Focus analysis on what happens right after the 'feed loaded' log.
+
+Which of my SwiftUI views is responsible for the hang around 6s?
+
+Record a new trace: attach to MyApp on my iPhone — I'll tell you when I'm done.
+```
+
+**Under the hood:**
+
+- `scripts/record_trace.py` — wraps `xctrace record`. Supports attach / launch / all-processes, stop-file for agent-driven sessions, time-limits, JSON device & template discovery.
+- `scripts/analyze_trace.py` — runs the five-lane analysis. Discovery modes `--list-logs`, `--list-signposts`, `--fanin-for` let the agent scope to a time window or trace a specific view back to its invalidation sources. `--window START_MS:END_MS` restricts every lane to a slice.
+- `scripts/instruments_parser/` — one module per lane (`time_profiler`, `hangs`, `hitches`, `swiftui`, `causes`), plus cross-lane `correlate` and a markdown `summary` renderer. Pure stdlib Python 3; only external dep is `xctrace` (ships with Xcode).
+
+**Key diagnostic:** `main_running_coverage_pct` on each hang/hitch correlation. < 25 % → main thread was blocked (I/O, lock, sync await); ≥ 75 % → CPU-bound. This single metric separates two radically different fix paths.
+
+Full guidance: [`swiftui-expert-skill/references/trace-analysis.md`](swiftui-expert-skill/references/trace-analysis.md) and [`swiftui-expert-skill/references/trace-recording.md`](swiftui-expert-skill/references/trace-recording.md).
 
 ## Skill Structure
 <!-- BEGIN REFERENCE STRUCTURE -->
