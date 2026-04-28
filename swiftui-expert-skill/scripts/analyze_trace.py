@@ -106,15 +106,20 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    # The three discovery modes aren't in a mutually_exclusive_group because
-    # they live alongside their sub-filters in the same argparse group; enforce
-    # the constraint by hand so an agent gets a clear error instead of silent
+    # The discovery modes aren't in a mutually_exclusive_group because they
+    # live alongside their sub-filters in the same argparse group; enforce the
+    # constraint by hand so an agent gets a clear error instead of silent
     # precedence.
-    active_modes = sum([args.list_logs, args.list_signposts, bool(args.fanin_for)])
+    active_modes = sum([
+        args.list_runs,
+        args.list_logs,
+        args.list_signposts,
+        bool(args.fanin_for),
+    ])
     if active_modes > 1:
         parser.error(
-            "--list-logs, --list-signposts, and --fanin-for are mutually "
-            "exclusive; pick one per invocation."
+            "--list-runs, --list-logs, --list-signposts, and --fanin-for are "
+            "mutually exclusive; pick one per invocation."
         )
 
     trace = args.trace

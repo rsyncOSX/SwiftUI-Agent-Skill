@@ -103,7 +103,7 @@ def list_signposts(
 
     Reads two complementary schemas:
       * `os-signpost-interval`: already-paired intervals (this is where
-        user-emitted signposts like com.modumhq.Helm typically land).
+        user-emitted signposts like com.example.MyApp typically land).
       * `os-signpost`: raw begin/end/event rows; we pair begins with ends
         ourselves and fall back to point events for unpaired rows. Most
         Apple-framework signposts (CloudKit, AppKit, …) live here.

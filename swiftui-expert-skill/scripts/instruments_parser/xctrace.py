@@ -50,9 +50,14 @@ def toc(trace_path: Path) -> TraceInfo:
 
     runs: list[RunInfo] = []
     for run_el in root.iterfind("./run"):
+        number_attr = run_el.get("number")
+        if not number_attr:
+            continue
         try:
-            number = int(run_el.get("number") or "0")
+            number = int(number_attr)
         except ValueError:
+            continue
+        if number <= 0:
             continue
 
         schemas: set[str] = set()
