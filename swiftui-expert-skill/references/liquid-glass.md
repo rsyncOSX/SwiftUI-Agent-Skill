@@ -70,12 +70,17 @@ Text("Capsule")
 
 ### GlassEffectStyle
 
-#### Prominence Levels
+#### Available Styles
+
+The `Glass` type exposes three static values — there is no `.prominent`:
 
 ```swift
-.glassEffect(.regular)     // Standard glass appearance
-.glassEffect(.prominent)   // More visible, higher contrast
+.glassEffect(.regular)   // Standard glass appearance (most common)
+.glassEffect(.clear)     // Nearly invisible glass surface
+.glassEffect(.identity)  // No-op / pass-through glass
 ```
+
+To make a surface appear more prominent, increase the tint opacity instead of reaching for a non-existent `.prominent` property.
 
 #### Tinting
 
@@ -83,7 +88,7 @@ Add color tint to the glass:
 
 ```swift
 .glassEffect(.regular.tint(.blue))
-.glassEffect(.prominent.tint(.red.opacity(0.3)))
+.glassEffect(.regular.tint(.red.opacity(0.3)))
 ```
 
 #### Interactivity
@@ -307,7 +312,9 @@ struct GlassSegmentedControl: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .glassEffect(
-                            selection == index ? .prominent.interactive() : .regular.interactive(),
+                            selection == index
+                                ? .regular.tint(.accentColor.opacity(0.4)).interactive()
+                                : .regular.interactive(),
                             in: .capsule
                         )
                         .glassEffectID(selection == index ? "selected" : "option\(index)", in: animation)
@@ -413,4 +420,4 @@ An automatic scroll edge effect blurs and fades content under system toolbars to
 - [ ] `glassEffectID` with `@Namespace` for morphing
 - [ ] Consistent shapes and spacing across feature
 - [ ] Container spacing matches layout spacing
-- [ ] Appropriate prominence levels used
+- [ ] Tint opacity used instead of non-existent `.prominent` for emphasis
